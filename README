@@ -1,0 +1,28 @@
+Make a ~/.stocks as CSV with columns
+
+    symbol,num_shares,purchase_price
+
+For example:
+
+    ibm,50,47.06
+    aapl,2,5.00
+    vti,10.5,50.00
+    # bought a second round for cheaper
+    vti,20,45.00
+    cash,1,123.45
+
+And run like:
+
+    ./tinystocks.py
+
+Output will  look like
+
+      symbol        curprice           count        curvalue   purchaseprice         gainper       totalgain      totalgain%
+        AAPL         $456.83            2.00         $913.66          $10.00         $451.83         $903.66        9036.60%
+        CASH           $1.00            1.00           $1.00         $123.45        -$122.45        -$122.45         -99.19%
+         IBM         $203.52           50.00       $10176.00        $2353.00         $156.46        $7823.00         332.47%
+         VTI          $77.39           30.50        $2360.39        $1625.00          $24.11         $735.39          45.26%
+    Portfolio value: $13451.06
+    Total purchase price: $4111.45
+    Total portfolio gain: $9339.60 (227.16%)
+
