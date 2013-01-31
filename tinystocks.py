@@ -68,6 +68,9 @@ def main():
         if symbol == 'CASH':
             curprice = 1.0
 
+        elif symbol == 'FEE':
+            curprice = 0.0
+
         else:
             quote    = get_stock_quote(symbol)
             curprice = float(quote['l_cur'])
