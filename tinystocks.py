@@ -158,18 +158,18 @@ def main():
 
     t.dump(sys.stdout)
 
-    print 'Portfolio value: %s' % locale.currency(totalvalue, grouping=True)
-    print 'Total purchase price: %s' % locale.currency(totalpurchase, grouping=True)
+    print 'Portfolio value:\t%s' % locale.currency(totalvalue, grouping=True)
+    print 'Total purchase price:\t%s' % locale.currency(totalpurchase, grouping=True)
 
     todaygain = totalvalue-totalopen
     todaygainperc = todaygain / totalopen * 100
-    print ('Total gain today: %s (%s)'
+    print ('Total gain today:\t%s (%s)'
            % (cgain(locale.currency(todaygain, grouping=True), todaygain)[0],
               cgain('%.3f%%' % todaygainperc, todaygainperc)[0]))
 
     gain = totalvalue - totalpurchase
     gainperc = gain/totalpurchase*100
-    print ('Total portfolio gain: %s (%s)'
+    print ('Total portfolio gain:\t%s (%s)'
            % (cgain(locale.currency(gain, grouping=True), gain)[0],
               cgain('%.3f%%' % gainperc, gainperc)[0]))
 
