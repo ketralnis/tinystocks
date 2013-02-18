@@ -12,7 +12,7 @@ locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 def get_stock_quote(ticker_symbol):
     # shamelessly stolen from http://coreygoldberg.blogspot.com/2011/09/python-stock-quotes-from-google-finance.html
-    url = 'http://finance.google.com/finance/info?q=%s' % ticker_symbol.upper()
+    url = 'http://www.google.com/finance/info?q=%s' % ticker_symbol.upper()
     data = urllib2.urlopen(url).read()
     lines = data.splitlines()
     lines = [x for x in lines if x not in ('// [', ']')] # they have some weird-ass format
@@ -102,6 +102,7 @@ def main():
 
     totalvalue    = 0.0
     totalpurchase = 0.0
+    totalopen     = 0.0
 
     fields = 'symbol count curprice curvalue purchaseprice today today% gaintoday totalgainper totalgain totalgain%'.split()
     t = Table(fields)
@@ -149,19 +150,28 @@ def main():
         r.set('totalgain',   * cgain(locale.currency(mygain, grouping=True), mygain))
         r.set('totalgain%',  * cgain('%.2f%%' % totalgainperc, totalgainperc))
 
+        t.append(r)
+
         totalvalue    += myvalue
         totalpurchase += mypurchase
+        totalopen     += myvalue - changetoday
 
     t.dump(sys.stdout)
 
     print 'Portfolio value: %s' % locale.currency(totalvalue, grouping=True)
     print 'Total purchase price: %s' % locale.currency(totalpurchase, grouping=True)
 
+    todaygain = totalvalue-totalopen
+    todaygainperc = todaygain / totalopen * 100
+    print ('Total gain today: %s (%s)'
+           % (cgain(locale.currency(todaygain, grouping=True), todaygain)[0],
+              cgain('%.3f%%' % todaygainperc, todaygainperc)[0]))
+
     gain = totalvalue - totalpurchase
     gainperc = gain/totalpurchase*100
     print ('Total portfolio gain: %s (%s)'
            % (cgain(locale.currency(gain, grouping=True), gain)[0],
-              cgain('%.2f%%' % gainperc, gainperc)[0]))
+              cgain('%.3f%%' % gainperc, gainperc)[0]))
 
 if __name__ == '__main__':
     main()
