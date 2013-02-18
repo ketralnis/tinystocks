@@ -2,6 +2,7 @@
 
 import os.path
 import json
+import sys
 import urllib2
 from collections import namedtuple
 from termcolor import colored
@@ -21,11 +22,11 @@ ownership = namedtuple('ownership', 'symbol count bought')
 
 def cgain(s, val):
     if val == 0.0:
-        return s
+        return s, len(s)
     elif val > 0.0:
-        return colored(s, 'white')
+        return colored(s, 'white'), len(s)
     elif val < 0.0:
-        return colored(s, 'red')
+        return colored(s, 'red'), len(s)
 
 
 def get_userdata():
@@ -51,14 +52,59 @@ def get_userdata():
 
     return data
 
+class Table(object):
+    def __init__(self, fields):
+        self.fields = fields
+        self.lens = dict((f, len(f)) for f in fields)
+        self.rows = []
+
+    def append(self, row):
+        assert sorted(row.data.keys()) == sorted(self.fields)
+
+        for k, v in row.data.iteritems():
+            self.lens[k] = max(self.lens[k], row.elens[k])
+
+        self.rows.append(row)
+
+    @staticmethod
+    def padto(s, numchrs, elen):
+        padding = ' ' * (numchrs - elen)
+        return ''.join((padding, s))
+
+    def dump(self, fd):
+        interfield = 2 # space between fields
+
+        for f in self.fields:
+            flen = self.lens[f]
+            fd.write(self.padto(f, flen+interfield, len(f)))
+        fd.write('\n')
+
+        for r in self.rows:
+            for f in self.fields:
+                flen = self.lens[f]
+                fd.write(self.padto(r.data[f], flen+interfield, r.elens[f]))
+            fd.write('\n')
+
+class Row(object):
+    def __init__(self):
+        self.data = {}
+        self.elens = {}
+
+    def set(self, k, v, elen=None):
+        self.data[k] = v
+        self.elens[k] = elen or len(v)
+
+    def __setitem__(self, k, v):
+        return self.set(k, v, len(v))
+
 def main():
     udata = get_userdata()
 
     totalvalue    = 0.0
     totalpurchase = 0.0
 
-    fields = 'symbol curprice count curvalue purchaseprice gainper totalgain totalgain%'.split()
-    print ' '.join(('%15s' % f) for f in fields)
+    fields = 'symbol count curprice curvalue purchaseprice today today% gaintoday totalgainper totalgain totalgain%'.split()
+    t = Table(fields)
 
     for symbol, os in sorted(udata.iteritems()):
         mycount    = 0.0
@@ -67,13 +113,19 @@ def main():
 
         if symbol == 'CASH':
             curprice = 1.0
+            changetoday = 0.0
+            changetodayperc = 0.0
 
         elif symbol == 'FEE':
             curprice = 0.0
+            changetoday = 0.0
+            changetodayperc = 0.0
 
         else:
-            quote    = get_stock_quote(symbol)
-            curprice = float(quote['l_cur'])
+            quote       = get_stock_quote(symbol)
+            curprice    = float(quote['l_cur'])
+            changetoday = float(quote['c'])
+            changetodayperc = float(quote['cp'])
 
         for o in os:
             mycount    += o.count
@@ -82,28 +134,34 @@ def main():
 
         mygain = myvalue - mypurchase
         gainper = (myvalue - mypurchase)/mycount
+        gaintoday = mycount * changetoday
         totalgainperc = mygain/mypurchase*100
-        print ('%15s %+15s %15.2f %+15s %+15s %s %s %s'
-               % (symbol,
-                  locale.currency(curprice),
-                  mycount,
-                  locale.currency(myvalue),
-                  locale.currency(mypurchase),
-                  cgain('%15s' % locale.currency(gainper), gainper),
-                  cgain('%15s' % locale.currency(mygain), mygain),
-                  cgain('%14.2f%%' % totalgainperc, totalgainperc)))
+        r = Row()
+        r['symbol']          = symbol
+        r['count']           = '%.0f' % mycount
+        r['curprice']        = locale.currency(curprice, grouping=True)
+        r['curvalue']        = locale.currency(myvalue, grouping=True)
+        r['purchaseprice']   = locale.currency(mypurchase, grouping=True)
+        r.set('today',       * cgain(locale.currency(changetoday, grouping=True), changetoday))
+        r.set('today%',      * cgain('%.2f%%' % changetodayperc, changetodayperc))
+        r.set('gaintoday',   * cgain(locale.currency(gaintoday, grouping=True), gaintoday))
+        r.set('totalgainper',* cgain(locale.currency(gainper, grouping=True), gainper))
+        r.set('totalgain',   * cgain(locale.currency(mygain, grouping=True), mygain))
+        r.set('totalgain%',  * cgain('%.2f%%' % totalgainperc, totalgainperc))
 
         totalvalue    += myvalue
         totalpurchase += mypurchase
 
-    print 'Portfolio value: %s' % locale.currency(totalvalue)
-    print 'Total purchase price: %s' % locale.currency(totalpurchase)
+    t.dump(sys.stdout)
+
+    print 'Portfolio value: %s' % locale.currency(totalvalue, grouping=True)
+    print 'Total purchase price: %s' % locale.currency(totalpurchase, grouping=True)
 
     gain = totalvalue - totalpurchase
     gainperc = gain/totalpurchase*100
     print ('Total portfolio gain: %s (%s)'
-           % (cgain(locale.currency(gain), gain),
-              cgain('%.2f%%' % gainperc, gainperc)))
+           % (cgain(locale.currency(gain, grouping=True), gain)[0],
+              cgain('%.2f%%' % gainperc, gainperc)[0]))
 
 if __name__ == '__main__':
     main()
