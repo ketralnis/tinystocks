@@ -154,7 +154,7 @@ def main():
 
         totalvalue    += myvalue
         totalpurchase += mypurchase
-        totalopen     += myvalue - changetoday
+        totalopen     += myvalue - changetoday * mycount
 
     t.dump(sys.stdout)
 
