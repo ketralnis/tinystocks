@@ -19,12 +19,14 @@ And run like:
 
 Output will look like
 
-    symbol  curprice   count   curvalue  purchaseprice  gainper  totalgain  totalgain%
-      AAPL   $445.34    2.00    $890.68         $10.00  $440.34    $880.68    8806.80%
-      CASH     $1.00  123.45    $123.45        $123.45    $0.00      $0.00       0.00%
-       FEE     $0.00    4.00      $0.00         $39.96   -$9.99    -$39.96    -100.00%
-       IBM   $203.93   50.00  $10196.50       $2353.00  $156.87   $7843.50     333.34%
-       VTI    $77.28   30.50   $2357.04       $1425.00   $30.56    $932.04      65.41%
-    Portfolio value: $13567.67
-    Total purchase price: $3951.41
-    Total portfolio gain: $9616.26 (243.36%)
+    symbol  count  curprice   curvalue  purchaseprice    today  today%  gaintoday  totalgainper  totalgain  totalgain%
+      AAPL      2   $448.85    $897.70         $10.00  -$11.14  -2.42%    -$22.28       $443.85    $887.70    8877.00%
+      CASH    123     $1.00    $123.45        $123.45    $0.00   0.00%      $0.00         $0.00      $0.00       0.00%
+       FEE      4     $0.00      $0.00         $39.96    $0.00   0.00%      $0.00        -$9.99    -$39.96    -100.00%
+       IBM     50   $199.31  $9,965.50      $2,353.00   -$1.01  -0.50%    -$50.50       $152.25  $7,612.50     323.52%
+       VTI     30    $78.09  $2,381.75      $1,425.00   -$1.05  -1.33%    -$32.02        $31.37    $956.75      67.14%
+    Portfolio value:       $13,368.40
+    Total purchase price:   $3,951.41
+    Total gain today:	     -$104.81 (-0.778%)
+    Total portfolio gain:   $9,416.99 (238.320%)
+
